@@ -31,7 +31,15 @@
           "image": "./assets/brand/splash.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow BiteRadar to show nearby saved food while the app is open."
+        }
+      ],
+      "expo-notifications",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,

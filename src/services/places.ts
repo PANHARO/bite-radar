@@ -1,4 +1,5 @@
 import { demoSpots } from "@/data/demo";
+import { Coordinates, metersBetween } from "./proximity";
 import { Spot } from "@/models/spot";
 export interface PlaceSearchService {
   search(query: string): Promise<Spot[]>;
@@ -25,18 +26,18 @@ export function isTikTokUrl(value: string): boolean {
     return false;
   }
 }
-export function distanceMeters(s: Spot): number {
+export function distanceMeters(s: Spot, origin?: Coordinates | null): number {
+  if (origin) return metersBetween(origin, s);
   if (s.demo)
     return s.imageKey === "malis" ? 350 : s.imageKey === "eleven" ? 850 : 1800;
-  const rad = Math.PI / 180,
-    a = (s.latitude - 11.555) * rad,
-    b = (s.longitude - 104.928) * rad;
-  const h =
-    Math.sin(a / 2) ** 2 +
-    Math.cos(11.555 * rad) * Math.cos(s.latitude * rad) * Math.sin(b / 2) ** 2;
-  return 6371000 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+  return Number.POSITIVE_INFINITY;
 }
-export const distanceLabel = (s: Spot) =>
-  distanceMeters(s) < 1000
-    ? `${Math.round(distanceMeters(s) / 10) * 10} m`
-    : `${(distanceMeters(s) / 1000).toFixed(1)} km`;
+export function distanceLabel(s: Spot, origin?: Coordinates | null): string {
+  const meters = distanceMeters(s, origin);
+  if (!Number.isFinite(meters)) return "Location off";
+  const label =
+    meters < 1000
+      ? `${Math.round(meters / 10) * 10} m`
+      : `${(meters / 1000).toFixed(1)} km`;
+  return !origin && s.demo ? `${label} demo` : label;
+}

@@ -47,8 +47,9 @@ export default function SuccessScreen() {
           {"\n"}Saved to My Saved Food. That craving won’t be forgotten.
         </Txt>
         <Notice icon="bell">
-          Want a nudge when you’re nearby? Set a radius and preview your
-          reminder. Reminders are optional; live alerts are coming later.
+          Want a nudge when you’re nearby? Enable optional reminders in
+          Settings. They work while the app is open; demo and visited places are
+          excluded.
         </Notice>
         <Button
           label="Set up nearby reminders"

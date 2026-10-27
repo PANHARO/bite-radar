@@ -1,3 +1,4 @@
+import { useLocation } from "@/store/location-store";
 import { useMemo, useRef, useState } from "react";
 import { ScrollView, TextInput, View } from "react-native";
 import { router } from "expo-router";
@@ -22,6 +23,8 @@ import { usePalette } from "@/hooks/use-palette";
 import { Sheet } from "@/components/bite/sheet";
 import { useNetworkState } from "expo-network";
 export default function SavedScreen() {
+  const location = useLocation(),
+    position = location.position;
   const { data } = useApp(),
     c = usePalette(),
     network = useNetworkState();
@@ -43,12 +46,12 @@ export default function SavedScreen() {
         )
         .sort((a, b) =>
           sort === "Nearest"
-            ? distanceMeters(a) - distanceMeters(b)
+            ? distanceMeters(a, position) - distanceMeters(b, position)
             : sort === "Name"
               ? a.name.localeCompare(b.name)
               : b.createdAt - a.createdAt,
         ),
-    [data.spots, filter, query, sort],
+    [data.spots, filter, query, sort, position],
   );
   if (!data.spots.length)
     return (
@@ -231,7 +234,7 @@ export default function SavedScreen() {
         </View>
       )}
       <Txt size={10} muted style={{ paddingBottom: 64 }}>
-        Demo distances · Sort by recently saved, nearest or name
+        Live distances when location is on · Demo distances otherwise
       </Txt>
       <Sheet
         visible={sorting}
@@ -250,7 +253,9 @@ export default function SavedScreen() {
           />
         ))}
         <Txt size={11} muted>
-          Nearest uses the demo location in Phnom Penh.
+          {position
+            ? "Nearest uses your current location."
+            : "Enable location in Settings for real distances. Demo places use sample distances; other places have no distance yet."}
         </Txt>
       </Sheet>
     </Page>

@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { View } from "react-native";
 import Animated, { FadeIn, ReduceMotion } from "react-native-reanimated";
+import { Position } from "@/services/proximity";
 import { Spot } from "@/models/spot";
 import { designAssets as a } from "@/constants/design-assets";
 import { Asset, Tap, Txt } from "./ui";
 export type MapProps = {
   spots: Spot[];
+  userPosition?: Position | null;
+  centerOnUser?: number;
   selectedId?: string;
   onSelect: (spot: Spot) => void;
   height?: number;

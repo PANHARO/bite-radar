@@ -11,6 +11,8 @@ import { Inter_600SemiBold } from "@expo-google-fonts/inter/600SemiBold";
 import { Inter_700Bold } from "@expo-google-fonts/inter/700Bold";
 import { Inter_800ExtraBold } from "@expo-google-fonts/inter/800ExtraBold";
 import { useReducedMotion } from "react-native-reanimated";
+import { LocationProvider } from "@/store/location-store";
+import { ReminderProvider } from "@/store/reminder-store";
 import { AppProvider, useApp } from "@/store/app-store";
 import { usePalette } from "@/hooks/use-palette";
 import { Button, Page, Txt } from "@/components/bite/ui";
@@ -75,7 +77,11 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AppProvider>
-          <Navigation />
+          <LocationProvider>
+            <ReminderProvider>
+              <Navigation />
+            </ReminderProvider>
+          </LocationProvider>
         </AppProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

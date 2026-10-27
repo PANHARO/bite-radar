@@ -1,3 +1,4 @@
+import { useLocation } from "@/store/location-store";
 import { useState } from "react";
 import { Linking, Platform, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -21,6 +22,7 @@ import { useApp } from "@/store/app-store";
 import { usePalette } from "@/hooks/use-palette";
 import { isTikTokUrl } from "@/services/places";
 export default function StateScreen() {
+  const location = useLocation();
   const { kind } = useLocalSearchParams<{ kind: string }>(),
     app = useApp(),
     c = usePalette();
@@ -186,9 +188,18 @@ export default function StateScreen() {
             A city is a good start.
           </Txt>
           <Notice icon="pin">
-            Current location is unavailable. You can still save food spots. This
-            release uses a demo location in Phnom Penh.
+            {location.error ||
+              "Enable location to see real distances. You can keep saving places without location access."}
           </Notice>
+          <Button
+            label="Try my location"
+            busy={location.busy}
+            onPress={() => {
+              void location.request().then((ok) => {
+                if (ok) router.dismissTo("/map");
+              });
+            }}
+          />
           <Field
             label="Choose your city"
             value="Phnom Penh, Cambodia"
@@ -208,9 +219,8 @@ export default function StateScreen() {
             }}
           />
           <Txt size={12} muted>
-            Location access is optional. Live Near Me and background reminders
-            will be added later. This also previews the fallback shown when
-            location access is denied.
+            Location is optional. Near Me and live distances work while the app
+            is open; background reminders are not enabled.
           </Txt>
         </>
       ) : kind === "reminders" ? (
@@ -260,7 +270,10 @@ export default function StateScreen() {
             secondary
             onPress={async () => {
               try {
-                await app.setPreferences({ reminderPreview: false });
+                await app.setPreferences({
+                  reminderPreview: false,
+                  nearbyReminders: false,
+                });
                 router.dismissTo("/settings");
               } catch {
                 setMessage("Could not save this preference. Please try again.");
@@ -268,8 +281,8 @@ export default function StateScreen() {
             }}
           />
           <Txt size={11} muted>
-            Permission recovery preview. This release does not request
-            notification or location access and does not send live alerts.
+            Permission recovery preview. Use Settings to enable real foreground
+            reminders. This screen is a design preview.
           </Txt>
         </>
       ) : kind === "notification" ? (

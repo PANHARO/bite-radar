@@ -16,6 +16,7 @@ export type Spot = {
 };
 export type Preferences = {
   reminderPreview: boolean;
+  nearbyReminders: boolean;
   radius: number;
   frequency: "daily" | "once";
   quietHours: boolean;
@@ -26,5 +27,6 @@ export type AppData = {
   onboarded: boolean;
   spots: Spot[];
   preferences: Preferences;
+  reminderHistory: Record<string, number>;
 };
 export type Draft = Omit<Spot, "id" | "createdAt"> & { id?: string };
