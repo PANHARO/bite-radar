@@ -1,56 +1,41 @@
-# Welcome to your Expo app 👋
+# BiteRadar
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Save the food. Find it when you're nearby.
 
-## Get started
+An Expo SDK 58 / React Native application implementing the existing BiteRadar Figma design. Phase A includes a private local collection, an interactive map, and the complete add → confirm → save journey.
 
-1. Install dependencies
+## Run on an Android tablet
 
-   ```bash
-   npm install
-   ```
+Use Node 24 LTS and an Expo Go version supporting SDK 58. Install Expo Go on the tablet, connect it and this computer to the same Wi-Fi network, then run:
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```powershell
+cd D:\bite-radar
+npm ci
+npx expo start --lan
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+Scan the terminal QR code with Expo Go. If the Wi-Fi network blocks LAN connections, use `npx expo start --tunnel`. No API keys are needed. [Expo device instructions](https://docs.expo.dev/get-started/start-developing/).
 
-### Other setup steps
+The first launch seeds three Phnom Penh demo restaurants. Save your own TikTok URL or enter a place manually. Restart the app to verify your collection persists. Demo restaurants intentionally have no fabricated TikTok links.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Checks
 
-## Learn more
+```powershell
+npm run typecheck
+npm run lint
+npm test
+npx expo-doctor
+npx expo export --platform all
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+The Playwright tests launch or reuse the web dev server and use a separate headless Chrome profile. Google Chrome must be installed. These are browser and data tests, not native-device tests. Screenshots are saved under `artifacts/`.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Boundaries
 
-## Join the community
+- Saved places and preferences live in AsyncStorage on this device. There is no cloud account or synchronization.
+- TikTok URLs are validated and retained; no video metadata, private Favorites, scraping, or share extension is implemented.
+- Native Expo Go uses `react-native-maps`. The Figma illustration is available as an alternate map and as the web/offline fallback. Android standalone builds use the illustrated map until Google Maps credentials are configured.
+- Places, coordinates, and distances are demo data. The manual form can save your own coordinates. Place search has a replaceable service interface.
+- Reminder settings and notifications are clearly labeled previews. Live location, notifications, and geofencing are not enabled.
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+See [the development handoff](BiteRadar_Development_Handoff.md) for the file inventory, verification details, limitations, and next milestone.

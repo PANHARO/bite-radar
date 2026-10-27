@@ -3,14 +3,18 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@expo-google-fonts/inter": "^0.4.2",
     "@expo/ui": "~58.0.22",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~58.0.17",
+    "expo-clipboard": "~58.0.4",
     "expo-constants": "~58.0.13",
     "expo-device": "~58.0.5",
     "expo-font": "~58.0.9",
     "expo-glass-effect": "~58.0.4",
     "expo-image": "~58.0.16",
     "expo-linking": "~58.0.14",
+    "expo-network": "~58.0.4",
     "expo-router": "~58.0.25",
     "expo-splash-screen": "~58.0.11",
     "expo-status-bar": "~58.0.4",
@@ -21,6 +25,7 @@
     "react-dom": "19.3.0",
     "react-native": "0.88.0",
     "react-native-gesture-handler": "~3.3.0",
+    "react-native-maps": "1.29.11",
     "react-native-reanimated": "4.7.1",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
@@ -28,7 +33,11 @@
     "react-native-worklets": "0.13.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@types/react": "~19.3.0",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~58.0.4",
+    "prettier": "^3.9.10",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -37,7 +46,11 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test",
+    "test:ui": "playwright test tests/main-ui.spec.ts tests/local-workflow.spec.ts tests/states-responsive.spec.ts",
+    "format": "prettier --write src/app src/components/bite src/screens src/services src/store src/models src/data src/constants/tokens.ts src/hooks/use-palette.ts tests"
   },
   "private": true
 }
