@@ -1,3 +1,23 @@
+# Foreground nearby reminders milestone — October 27, 2026
+
+The user completed Android manual acceptance of the Phase A demo save/edit/visited/delete/dark-mode/rotation workflows. This milestone adds real foreground location and local notifications; physical acceptance of the new native behavior remains pending.
+
+- `location-store.tsx`: opt-in foreground permission, current fix/watch, timeout/recovery, app-state cleanup and refresh after returning to the app. No background permission is requested.
+- `reminder-store.tsx` and platform notification adapters: explicit consent, Android channel, native local delivery and notification-tap routing after collection hydration. Web notification delivery is unavailable and clearly labeled.
+- `proximity.ts` / `reminders.ts`: Haversine distance, accuracy/freshness checks, demo/visited exclusion, quiet hours, persisted once/day or once/place suppression, a persisted one-alert-per-minute cap, serialized reservations and failure backoff.
+- Existing data upgrades in memory with real reminders OFF, regardless of the legacy preview preference. History is removed with its place or when clearing the collection.
+- Live distances are used in Home, cards, Saved sorting, Map, confirmation and details. Native Near Me centers on the user; illustrated fallback remains geographically limited.
+- Manual confirmation requires actual coordinates for a new place. The user can explicitly use their current position as the pin. No automated restaurant identification or real Places search has been added.
+- Dependencies installed with `expo install`: `expo-location ~58.0.19` and `expo-notifications ~58.1.6`. Config plugins request only foreground location and local notifications. The lockfile's missing optional dependency records were repaired. Expo's recommended patch updates were applied within SDK 58.
+- Validation: TypeScript and ESLint pass; 22 Playwright data/browser tests pass; Expo Doctor passes all 20 checks; the repaired lockfile passes a clean-install dry run; Android, iOS and web production exports succeed. Native permission prompts, map centering and OS notification delivery still require tablet/device acceptance.
+- See README for installation and the already-inside test, including disabling quiet hours when testing after 10 PM.
+
+Known delivery limit: disk reservation precedes OS scheduling to avoid repeat alerts after reload. A process crash between the two may suppress a reminder for that period. OS-level channel settings can suppress visible delivery; a scheduling success cannot prove a displayed banner. Background geofencing, Google Places, TikTok metadata, cloud sync and PWA notifications remain future work.
+
+The original Phase A handoff below is historical; its statements about location/reminders being previews are superseded by this section and the current README.
+
+---
+
 # BiteRadar Phase A implementation handoff
 
 ## Scope and source

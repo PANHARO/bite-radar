@@ -1,3 +1,4 @@
+import { useLocation } from "@/store/location-store";
 import { ScrollView, View } from "react-native";
 import { router } from "expo-router";
 import {
@@ -16,10 +17,12 @@ import { useApp } from "@/store/app-store";
 import { distanceMeters } from "@/services/places";
 import { usePalette } from "@/hooks/use-palette";
 export default function HomeScreen() {
+  const location = useLocation(),
+    position = location.position;
   const { data } = useApp(),
     c = usePalette();
   const nearby = [...data.spots].sort(
-    (a, b) => distanceMeters(a) - distanceMeters(b),
+    (a, b) => distanceMeters(a, position) - distanceMeters(b, position),
   );
   const recent = [...data.spots].sort((a, b) => b.createdAt - a.createdAt)[0];
   return (
@@ -27,13 +30,13 @@ export default function HomeScreen() {
       <View style={{ paddingHorizontal: 24, gap: 12 }}>
         <View style={styles.between}>
           <Tap
-            onPress={() => router.push("/state/location")}
+            onPress={() => router.push("/settings")}
             accessibilityRole="button"
           >
             <View style={[styles.row, { minHeight: 44 }]}>
               <Icon name="pin" />
               <Txt size={13} weight="bold">
-                Phnom Penh
+                {position ? "Current location" : "Enable location"}
               </Txt>
               <Icon name="down" />
             </View>
@@ -135,8 +138,8 @@ export default function HomeScreen() {
           <View style={styles.row}>
             <Icon name="bellOff" />
             <Txt size={11} muted>
-              {data.preferences.reminderPreview
-                ? "Reminder preview is on · No live alerts"
+              {data.preferences.nearbyReminders
+                ? "Nearby reminders on · While app is open"
                 : "Quick Reminder is off · Set up when you’re ready"}
             </Txt>
           </View>
@@ -147,7 +150,9 @@ export default function HomeScreen() {
           onPress={() => router.push("/add")}
         />
         <Txt size={10} style={{ color: c.secondary }}>
-          Private collection · Demo places and distances
+          {position
+            ? "Private collection · Live distances"
+            : "Private collection · Enable location for live distances"}
         </Txt>
       </View>
     </Page>

@@ -50,5 +50,22 @@ export function decodeData(raw: string): AppData {
   )
     throw fail();
   if (new Set(d.spots.map((s) => s.id)).size !== d.spots.length) throw fail();
-  return d;
+  // Older Phase A data is upgraded in memory; preview consent never enables alerts.
+  if (p.nearbyReminders !== undefined && typeof p.nearbyReminders !== "boolean")
+    throw fail();
+  if (
+    d.reminderHistory !== undefined &&
+    (!d.reminderHistory ||
+      typeof d.reminderHistory !== "object" ||
+      Array.isArray(d.reminderHistory) ||
+      Object.values(d.reminderHistory).some(
+        (v) => typeof v !== "number" || !Number.isFinite(v) || v < 0,
+      ))
+  )
+    throw fail();
+  return {
+    ...d,
+    preferences: { ...p, nearbyReminders: p.nearbyReminders ?? false },
+    reminderHistory: d.reminderHistory ?? {},
+  };
 }

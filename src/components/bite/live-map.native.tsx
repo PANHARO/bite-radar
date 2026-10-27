@@ -24,6 +24,13 @@ export default function LiveMap(props: MapProps) {
         reduce ? 0 : 300,
       );
   }, [selected, reduce]);
+  useEffect(() => {
+    if (props.centerOnUser && props.userPosition)
+      map.current?.animateToRegion(
+        { ...props.userPosition, latitudeDelta: 0.015, longitudeDelta: 0.015 },
+        reduce ? 0 : 300,
+      );
+  }, [props.centerOnUser, props.userPosition, reduce]);
   if (!liveMapAvailable) return <DemoMap {...props} />;
   return (
     <MapView
@@ -35,7 +42,7 @@ export default function LiveMap(props: MapProps) {
         latitudeDelta: 0.027,
         longitudeDelta: 0.022,
       }}
-      showsUserLocation={false}
+      showsUserLocation={!!props.userPosition}
       showsMyLocationButton={false}
       toolbarEnabled={false}
       customMapStyle={[
@@ -58,7 +65,7 @@ export default function LiveMap(props: MapProps) {
           identifier={s.id}
           coordinate={{ latitude: s.latitude, longitude: s.longitude }}
           title={s.name}
-          description="Saved food spot · demo coordinates"
+          description={s.demo ? "Demo restaurant coordinates" : s.address}
           onPress={() => props.onSelect(s)}
         >
           <View

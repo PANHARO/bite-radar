@@ -1,3 +1,4 @@
+import { useLocation } from "@/store/location-store";
 import { View } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -53,6 +54,7 @@ export function FoodPhoto({
   );
 }
 export function NearbyCard({ spot }: { spot: Spot }) {
+  const { position } = useLocation();
   const c = usePalette();
   return (
     <Tap
@@ -60,7 +62,7 @@ export function NearbyCard({ spot }: { spot: Spot }) {
         router.push({ pathname: "/place/[id]", params: { id: spot.id } })
       }
       accessibilityRole="button"
-      accessibilityLabel={`${spot.name}, ${distanceLabel(spot)} from demo location`}
+      accessibilityLabel={`${spot.name}, ${distanceLabel(spot, position)} away`}
       style={{ width: 248 }}
     >
       <View
@@ -86,7 +88,7 @@ export function NearbyCard({ spot }: { spot: Spot }) {
             }}
           >
             <Txt size={11} weight="bold">
-              ↗ {distanceLabel(spot)}
+              ↗ {distanceLabel(spot, position)}
             </Txt>
           </View>
           <View
@@ -124,6 +126,7 @@ export function NearbyCard({ spot }: { spot: Spot }) {
   );
 }
 export function RecentCard({ spot }: { spot: Spot }) {
+  const { position } = useLocation();
   const c = usePalette();
   return (
     <Tap
@@ -150,7 +153,7 @@ export function RecentCard({ spot }: { spot: Spot }) {
             {spot.name}
           </Txt>
           <Txt size={12} muted>
-            {spot.description} · {distanceLabel(spot)}
+            {spot.description} · {distanceLabel(spot, position)}
           </Txt>
           <Txt size={10} weight="semibold" style={{ color: c.danger }}>
             {spot.tiktokUrl
@@ -164,6 +167,7 @@ export function RecentCard({ spot }: { spot: Spot }) {
   );
 }
 export function SavedCard({ spot, height }: { spot: Spot; height: number }) {
+  const { position } = useLocation();
   const c = usePalette();
   return (
     <Tap
@@ -200,7 +204,7 @@ export function SavedCard({ spot, height }: { spot: Spot; height: number }) {
             }}
           >
             <Txt size={10} weight="bold">
-              {distanceLabel(spot)}
+              {distanceLabel(spot, position)}
             </Txt>
           </View>
         </View>

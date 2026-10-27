@@ -1,3 +1,4 @@
+import { useLocation } from "@/store/location-store";
 import { useState } from "react";
 import { Platform, ScrollView, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -28,6 +29,8 @@ import { usePalette } from "@/hooks/use-palette";
 import { distanceLabel } from "@/services/places";
 import { openMaps } from "@/services/links";
 export default function MapScreen() {
+  const location = useLocation(),
+    position = location.position;
   const { data } = useApp(),
     c = usePalette();
   const params = useLocalSearchParams<{ selected?: string }>();
@@ -35,7 +38,8 @@ export default function MapScreen() {
     [query, setQuery] = useState(""),
     [filter, setFilter] = useState("All food"),
     [illustration, setIllustration] = useState(!liveMapAvailable),
-    [failure, setFailure] = useState("");
+    [failure, setFailure] = useState(""),
+    [centerOnUser, setCenterOnUser] = useState(0);
   const visible = data.spots.filter(
     (s) =>
       `${s.name} ${s.category} ${s.notes}`
@@ -65,6 +69,8 @@ export default function MapScreen() {
     <Page padded={false}>
       <View style={{ position: "relative" }}>
         <MapComponent
+          userPosition={position}
+          centerOnUser={centerOnUser}
           spots={visible}
           selectedId={spot?.id}
           onSelect={(s) => {
@@ -99,7 +105,14 @@ export default function MapScreen() {
           </ScrollView>
         </View>
         <Tap
-          onPress={() => router.push("/state/location")}
+          onPress={() => {
+            void location.request().then((ok) => {
+              if (ok) {
+                setCenterOnUser((n) => n + 1);
+                setIllustration(!liveMapAvailable);
+              } else router.push("/state/location");
+            });
+          }}
           style={{ position: "absolute", right: 24, top: 368 }}
           accessibilityRole="button"
         >
@@ -107,7 +120,7 @@ export default function MapScreen() {
             <View style={styles.row}>
               <Icon name="locate" />
               <Txt size={12} weight="bold">
-                Near Me
+                {location.busy ? "Locating…" : "Near Me"}
               </Txt>
             </View>
           </Card>
@@ -127,7 +140,12 @@ export default function MapScreen() {
             style={{ backgroundColor: c.surface, borderRadius: 16, padding: 8 }}
           >
             <Txt size={10} muted>
-              Phnom Penh · {visible.length} private spots
+              {illustration
+                ? "Phnom Penh illustration"
+                : position
+                  ? "Current area"
+                  : "Phnom Penh"}{" "}
+              · {visible.length} private spots
             </Txt>
           </View>
           {liveMapAvailable && (
@@ -204,7 +222,7 @@ export default function MapScreen() {
                       {spot.name}
                     </Txt>
                     <Txt size={13} muted>
-                      {spot.category} · {distanceLabel(spot)} away
+                      {spot.category} · {distanceLabel(spot, position)} away
                     </Txt>
                     <Txt size={11} muted>
                       {spot.address}
@@ -262,8 +280,12 @@ export default function MapScreen() {
               <Txt size={10} muted>
                 {illustration || Platform.OS === "web"
                   ? "Interactive demo map · Illustrative streets"
-                  : "Demo restaurant coordinates"}{" "}
-                · Demo distances · Opens your maps app
+                  : "Saved restaurant coordinates"}{" "}
+                ·{" "}
+                {position
+                  ? "Live distances"
+                  : "Enable location for live distances"}{" "}
+                · Opens your maps app
               </Txt>
             </>
           ) : (

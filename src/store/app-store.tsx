@@ -12,6 +12,8 @@ import { readData, writeData } from "@/services/storage";
 type Store = {
   data: AppData;
   ready: boolean;
+  getCurrentData: () => AppData;
+  recordReminder: (id: string, at: number | null) => Promise<void>;
   error: string;
   reload: () => void;
   completeOnboarding: () => Promise<void>;
@@ -58,6 +60,15 @@ export function AppProvider({ children }: React.PropsWithChildren) {
   const value: Store = {
     data,
     ready,
+    getCurrentData: () => latest.current,
+    recordReminder: (id, at) =>
+      commit((d) => {
+        const reminderHistory = { ...d.reminderHistory };
+        if (at === null || !d.spots.some((s) => s.id === id))
+          delete reminderHistory[id];
+        else reminderHistory[id] = at;
+        return { ...d, reminderHistory };
+      }),
     error,
     reload,
     draft,
@@ -88,10 +99,18 @@ export function AppProvider({ children }: React.PropsWithChildren) {
         ),
       })),
     removeSpot: (id) =>
-      commit((d) => ({ ...d, spots: d.spots.filter((s) => s.id !== id) })),
+      commit((d) => {
+        const reminderHistory = { ...d.reminderHistory };
+        delete reminderHistory[id];
+        return {
+          ...d,
+          reminderHistory,
+          spots: d.spots.filter((s) => s.id !== id),
+        };
+      }),
     setPreferences: (patch) =>
       commit((d) => ({ ...d, preferences: { ...d.preferences, ...patch } })),
-    clearSpots: () => commit((d) => ({ ...d, spots: [] })),
+    clearSpots: () => commit((d) => ({ ...d, spots: [], reminderHistory: {} })),
   };
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }

@@ -1,5 +1,14 @@
+import { useLocation } from "@/store/location-store";
+import { useReminders } from "@/store/reminder-store";
 import { useState } from "react";
-import { ScrollView, Share, Switch, View } from "react-native";
+import {
+  Linking,
+  Platform,
+  ScrollView,
+  Share,
+  Switch,
+  View,
+} from "react-native";
 import { router } from "expo-router";
 import {
   Button,
@@ -18,6 +27,8 @@ import { useApp } from "@/store/app-store";
 import { usePalette } from "@/hooks/use-palette";
 import { Preferences } from "@/models/spot";
 export default function SettingsScreen() {
+  const location = useLocation(),
+    reminders = useReminders();
   const { data, setPreferences, clearSpots } = useApp(),
     c = usePalette(),
     p = data.preferences;
@@ -40,9 +51,23 @@ export default function SettingsScreen() {
           LOCATION &amp; NOTIFICATIONS
         </Txt>
         {[
-          ["While using the app", "Not requested"],
-          ["Background location", "Not requested"],
-          ["Notifications", "Not requested"],
+          [
+            "While using the app",
+            location.permission === "granted"
+              ? "Allowed"
+              : location.permission === "denied"
+                ? "Denied"
+                : "Not requested",
+          ],
+          ["Background location", "Not enabled"],
+          [
+            "Notifications",
+            !reminders.supported
+              ? "Native app only"
+              : reminders.permitted
+                ? "Allowed"
+                : "Not allowed yet",
+          ],
         ].map(([label, value]) => (
           <View key={label} style={styles.between}>
             <Txt size={12}>{label}</Txt>
@@ -51,9 +76,45 @@ export default function SettingsScreen() {
             </Txt>
           </View>
         ))}
+        <Button
+          label={
+            location.permission === "granted"
+              ? "Refresh my location"
+              : "Enable my location"
+          }
+          busy={location.busy}
+          onPress={() => {
+            void location.request();
+          }}
+        />
+        {location.position && (
+          <Txt size={11} muted>
+            Current position: {location.position.latitude.toFixed(5)},{" "}
+            {location.position.longitude.toFixed(5)} · Accuracy{" "}
+            {Math.round(location.position.accuracy ?? 0)} m
+          </Txt>
+        )}
+        {!!location.error && (
+          <Txt size={12} style={{ color: c.danger }}>
+            {location.error}
+          </Txt>
+        )}
+        {Platform.OS !== "web" && (
+          <Button
+            label="Open device permissions"
+            secondary
+            onPress={() => {
+              void Linking.openSettings().catch(() =>
+                setFailure(
+                  "Open Expo Go or BiteRadar permissions in device settings.",
+                ),
+              );
+            }}
+          />
+        )}
         <Txt size={11} muted>
-          Explore demo places without sharing your location. Live nearby
-          reminders arrive in a later milestone.
+          Location is used only while the app is open. You can keep saving
+          places without granting access.
         </Txt>
       </Card>
       <View style={styles.between}>
@@ -62,24 +123,53 @@ export default function SettingsScreen() {
             Nearby reminders
           </Txt>
           <Txt size={12} muted>
-            {p.reminderPreview
-              ? "Preview on · No live alerts"
+            {p.nearbyReminders
+              ? reminders.permitted && location.position
+                ? "On · While app is open"
+                : "Paused · Check permissions and location"
               : "Off · Your choice, always"}
           </Txt>
         </View>
         <Switch
-          accessibilityLabel="Reminder preview"
-          value={p.reminderPreview}
-          onValueChange={(v) => update({ reminderPreview: v })}
+          accessibilityLabel="Nearby reminders"
+          value={p.nearbyReminders}
+          disabled={reminders.busy || location.busy || !reminders.supported}
+          onValueChange={(enabled) => {
+            void (enabled ? reminders.enable() : reminders.disable());
+          }}
           trackColor={{ false: "#777777", true: "#E6B800" }}
           thumbColor="#FFFFFF"
         />
       </View>
+      {reminders.busy && (
+        <Txt muted>Setting up location and notifications…</Txt>
+      )}
+      {!!reminders.error && (
+        <Txt size={12} style={{ color: c.danger }}>
+          {reminders.error}
+        </Txt>
+      )}
+      {p.nearbyReminders && !reminders.permitted && (
+        <Button
+          label="Retry reminder permissions"
+          busy={reminders.busy}
+          onPress={() => {
+            void reminders.enable();
+          }}
+        />
+      )}
       <Notice>
-        {p.reminderPreview
-          ? "Preview only. Your saved preferences are active; live notifications and location tracking are not enabled."
-          : "Set up when you’re ready. This release previews reminders without requesting notifications or background location."}
+        Reminders work while BiteRadar is open. They check immediately when you
+        enable them, reopen the app, or save a place already nearby. Demo and
+        visited places never trigger alerts. Weak GPS fixes pause alerts.
+        Background reminders are a later milestone.
       </Notice>
+      {!reminders.supported && (
+        <Txt muted>
+          Web supports live distances. Use the Android or iOS app for nearby
+          notifications.
+        </Txt>
+      )}
       <View style={{ gap: 6 }}>
         <View style={styles.between}>
           <Txt size={13} weight="semibold">
@@ -141,8 +231,8 @@ export default function SettingsScreen() {
         ))}
       </Card>
       <Txt size={11} muted>
-        These preferences are stored on this device. Reminder previews do not
-        send notifications.
+        Preferences and alert history stay on this device. Quiet hours pause
+        alerts from 10 PM to 8 AM using device time.
       </Txt>
       <View style={{ gap: 12 }}>
         <Txt size={18} weight="extra">
@@ -208,7 +298,8 @@ export default function SettingsScreen() {
       </Tap>
       {failure ? <Txt style={{ color: c.danger }}>{failure}</Txt> : null}
       <Txt size={10} muted style={{ textAlign: "center" }}>
-        BiteRadar · Phase A{"\n"}Save the food. Find it when you&apos;re nearby.
+        BiteRadar · Foreground reminders{"\n"}Save the food. Find it when
+        you&apos;re nearby.
       </Txt>
       <Sheet
         visible={!!sheet}

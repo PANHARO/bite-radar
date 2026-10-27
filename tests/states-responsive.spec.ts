@@ -33,9 +33,6 @@ test("settings persist and corrupt storage is not overwritten", async ({
     .getByRole("button", { name: "Settings and reminders", exact: true })
     .click();
   await page.getByRole("button", { name: "200 m", exact: true }).click();
-  await page
-    .getByRole("switch", { name: "Reminder preview", exact: true })
-    .click();
   await page.getByRole("button", { name: "Dark", exact: true }).click();
   await page.reload();
   await expect(
@@ -45,7 +42,7 @@ test("settings persist and corrupt storage is not overwritten", async ({
     page.getByRole("button", { name: "Dark", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
   await expect(
-    page.getByText("Preview on · No live alerts", { exact: true }),
+    page.getByText("Off · Your choice, always", { exact: true }),
   ).toBeVisible();
   await capture(page, "artifacts/settings-dark.png");
   await page.evaluate(() =>

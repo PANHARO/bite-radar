@@ -2,7 +2,7 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests",
   webServer: {
-    command: "npx expo start --web --port 8081",
+    command: "npx expo start --web --localhost --port 8081",
     url: "http://localhost:8081",
     reuseExistingServer: true,
     timeout: 120000,
@@ -13,7 +13,11 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:8081",
     viewport: { width: 390, height: 908 },
-    launchOptions: { channel: "chrome" },
+    launchOptions: process.env.PLAYWRIGHT_EXECUTABLE_PATH
+      ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH }
+      : process.env.PLAYWRIGHT_CHROMIUM
+        ? {}
+        : { channel: "chrome" },
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },

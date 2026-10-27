@@ -1,3 +1,4 @@
+import { useLocation } from "@/store/location-store";
 import { useState } from "react";
 import { Switch, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -21,6 +22,8 @@ import { usePalette } from "@/hooks/use-palette";
 import { distanceLabel } from "@/services/places";
 import { openMaps, openUrl } from "@/services/links";
 export default function DetailScreen() {
+  const location = useLocation(),
+    position = location.position;
   const { id } = useLocalSearchParams<{ id: string }>(),
     app = useApp(),
     c = usePalette();
@@ -107,7 +110,7 @@ export default function DetailScreen() {
             <IconButton name="edit" label="Edit restaurant" onPress={edit} />
           </View>
           <Txt muted>
-            {spot.category} food · {distanceLabel(spot)} away
+            {spot.category} food · {distanceLabel(spot, position)} away
           </Txt>
           <View style={styles.row}>
             <Icon name="pin" />
@@ -178,21 +181,21 @@ export default function DetailScreen() {
                   Remind me nearby
                 </Txt>
                 <Txt size={11} muted>
-                  {app.data.preferences.reminderPreview
-                    ? "Preview on · No live alerts"
+                  {app.data.preferences.nearbyReminders
+                    ? "On · While app is open"
                     : "Off · Set up when you’re ready"}
                 </Txt>
               </View>
               <Switch
                 accessibilityLabel="Configure nearby reminders"
-                value={app.data.preferences.reminderPreview}
+                value={app.data.preferences.nearbyReminders}
                 onValueChange={() => router.push("/settings")}
                 trackColor={{ true: "#E6B800" }}
               />
             </View>
             <Txt size={11} muted>
-              Optional. Your preference is local. Live notifications and
-              background location will come later.
+              Alerts use your current location while the app is open. Demo and
+              visited places are excluded.
             </Txt>
           </Card>
         </Tap>

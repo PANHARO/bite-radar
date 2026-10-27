@@ -2,7 +2,16 @@ import { capture } from "./capture";
 import { test, expect } from "@playwright/test";
 test("save, restart, map, visit, edit and remove a local restaurant", async ({
   page,
+  context,
 }) => {
+  // Verify our original-link destination without relying on TikTok availability.
+  await context.route("https://www.tiktok.com/**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "text/html",
+      body: "<title>Original TikTok destination</title>",
+    }),
+  );
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");

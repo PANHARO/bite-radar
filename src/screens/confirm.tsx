@@ -1,3 +1,4 @@
+import { useLocation } from "@/store/location-store";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { router } from "expo-router";
@@ -20,6 +21,7 @@ import { usePalette } from "@/hooks/use-palette";
 import { Draft, Spot } from "@/models/spot";
 import { distanceLabel, placeSearch } from "@/services/places";
 export default function ConfirmScreen() {
+  const location = useLocation();
   const app = useApp(),
     c = usePalette();
   const [place, setPlace] = useState<Draft | null>(app.draft),
@@ -28,9 +30,11 @@ export default function ConfirmScreen() {
     [manual, setManual] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
-    [latitude, setLatitude] = useState(String(app.draft?.latitude || 11.555)),
+    [latitude, setLatitude] = useState(
+      app.draft?.address ? String(app.draft.latitude) : "",
+    ),
     [longitude, setLongitude] = useState(
-      String(app.draft?.longitude || 104.928),
+      app.draft?.address ? String(app.draft.longitude) : "",
     );
   useEffect(() => {
     let active = true;
@@ -208,6 +212,34 @@ export default function ConfirmScreen() {
       </Txt>
       {manual && (
         <Card style={{ gap: 16 }}>
+          <Txt size={12} muted>
+            At the restaurant? Use your current position below. Otherwise enter
+            its verified coordinates. Your position is not an automatic
+            restaurant match.
+          </Txt>
+          <Button
+            label={
+              location.position
+                ? "Use my current location as pin"
+                : "Get my current location"
+            }
+            secondary
+            busy={location.busy}
+            onPress={() => {
+              if (location.position) {
+                setLatitude(String(location.position.latitude));
+                setLongitude(String(location.position.longitude));
+                setPlace({ ...place, demo: false });
+              } else {
+                void location.request();
+              }
+            }}
+          />
+          {!!location.error && (
+            <Txt size={12} style={{ color: c.danger }}>
+              {location.error}
+            </Txt>
+          )}
           <Field
             label="Restaurant name"
             accessibilityLabel="Confirmed restaurant name"
@@ -245,8 +277,8 @@ export default function ConfirmScreen() {
             keyboardType="numbers-and-punctuation"
           />
           <Txt size={11} muted>
-            Default coordinates use the demo center of Phnom Penh. Enter
-            coordinates you want to save.
+            Enter verified restaurant coordinates. A new place has no default
+            location.
           </Txt>
         </Card>
       )}
@@ -270,7 +302,8 @@ export default function ConfirmScreen() {
             {place.address || "Choose a restaurant or enter its address"}
           </Txt>
           <Txt size={12} muted>
-            {distanceLabel(preview)} from your demo location
+            {distanceLabel(preview, location.position)}
+            {location.position ? " from you" : ""}
           </Txt>
         </View>
       </Card>

@@ -51,8 +51,10 @@ export const initialData: AppData = {
   version: 1,
   onboarded: false,
   spots: demoSpots,
+  reminderHistory: {},
   preferences: {
     reminderPreview: false,
+    nearbyReminders: false,
     radius: 500,
     frequency: "daily",
     quietHours: true,
